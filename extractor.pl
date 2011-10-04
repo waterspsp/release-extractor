@@ -21,16 +21,16 @@ use File::Basename;
 use String::Similarity;
 use Cwd;
 
-my $current_dir = getcwd;
+
 
 
 # save path will dump in:
 # Movies: $base_path/Movies/Movie Name (Year)/Movie File.ext(s)
 # TV Shows: $base_path/Television/Show Name/Season #/Show Name s[xx]e[yy] - Episode Name.ext(s)
-my $save_path = "G:\\sorted\\";
+my $save_path = "C:/Media/";
 
 # IMDB cache directory
-my $imdb_cache = $current_dir . "/.imdb_cache/";
+my $imdb_cache = getcwd . "/imdb_cache/";
 
 # Global exception
 # Release names that match these days WILL get IGNORED!
@@ -42,7 +42,7 @@ my $global_exclusion = "extras|subpack";
 
 # rar setup
 # Path and parameters
-my $winrar_path = "C:\\Program Files\\WinRAR\\Rar.exe";
+my $winrar_path = "C:/Program Files/WinRAR/Rar.exe";
 # ; delimited list of extensions to extract (ONLY THESE EXTENSIONS GET EXTRACTED!)
 # Remove the -ms parameter below to disable this and extract-all
 my $winrar_extensions = "3gp;asf;avi;flv;m1s;m1v;m2s;m2v;m4v;mkv;mov;mp2v;mp4;mpe;mpeg;mpg;ogg;ogm;qt;sub;wmv";
@@ -121,13 +121,13 @@ sub ExtractOne
     if ($cur_torrent{'is_tv'}) 
     {
         $filename = ($cur_torrent{'imdb_name'} || $cur_torrent{'clean_name'});
-        $target_directory .= sprintf("Television\\%s\\Season %d\\", ($cur_torrent{'imdb_name'} || $cur_torrent{'clean_name'}), $cur_torrent{'season'});
+        $target_directory .= sprintf("Television/%s/Season %d/", ($cur_torrent{'imdb_name'} || $cur_torrent{'clean_name'}), $cur_torrent{'season'});
         $filename .= sprintf(" S%02dE%02d", $cur_torrent{'season'}, $cur_torrent{'episode'});
         $filename .= sprintf(" - %s", $cur_torrent{'episode_title'}) if ($cur_torrent{'episode_title'});
     }
     elsif($cur_torrent{'is_movie'})
     {
-        $target_directory .= sprintf("Movies\\%s (%d)\\", ($cur_torrent{'imdb_name'} || $cur_torrent{'clean_name'}), $cur_torrent{'year'});
+        $target_directory .= sprintf("Movies/%s (%d)/", ($cur_torrent{'imdb_name'} || $cur_torrent{'clean_name'}), $cur_torrent{'year'});
     }
 
     my $rars = GetRarsForDirectory($cur_torrent{'original_path'});
@@ -148,11 +148,11 @@ sub ExtractOne
 			{
 				my $file_score = similarity(lc($lastrar), lc(${$rars->{$dir}}[$i]));
 
-				if ($file_score < 0.91) 
+				if ($file_score < 0.93) 
 				{
 					print "New rar file!\n";
 				}
-				elsif ($file_score > 0.90 && $file_score != 1.0)
+				elsif ($file_score > 0.93 && $file_score != 1.0)
 				{
 					print "RAR too similar (multi-part .rar?) - skipping!\n";
 					next;
@@ -365,7 +365,6 @@ sub LoadReleaseDetails
         $release{'full_season'} = true;
     }
 
-	#(.*)\.s?(\d{1,2})[\. _-]?[e|x](\d{1,2})\.(?:.*\.)?(?:(?<tags>$tv_tags)[\._-])*(?:(?<sources>$tv_sources))[\._-])*(?<formats>$format_tags).*[\._-](?<group>\S+)
     # Single Episode
     if (!$release{'is_pack'} && $release_name =~ /(.*)\.s?(\d{1,2})[\. _-]?[e|x](\d{1,2})\.(?:.*\.)?(?:(?<tags>$tv_tags)[\._-])*(?:(?<sources>$tv_sources)[\._-])*(?<formats>$format_tags).*[\._-](?<group>\S+)/i) 
     {
